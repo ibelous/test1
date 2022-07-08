@@ -11,7 +11,7 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'username', 'user_type',
+            'username',
         )
 
 
@@ -74,16 +74,20 @@ class TokenSerializer(ModelSerializer):
 
 
 class ProductSerializer(ModelSerializer):
+    seller = UserSerializer(read_only=True)
+
     class Meta:
         model = Product
         fields = (
             'id',
             'name',
             'price',
-            'quantity'
+            'quantity',
+            'seller'
         )
 
     def create(self, validated_data):
+        print(validated_data)
         product = Product.objects.create(**validated_data)
         return product
 

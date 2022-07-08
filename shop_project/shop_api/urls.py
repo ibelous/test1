@@ -10,6 +10,9 @@ products_patterns = [
         views.ProductListAPIView.as_view(),
         name='products-list'
     ),
+    path('create/',
+         views.ProductCreateAPIView.as_view(),
+         name='products-create')
 ]
 
 accounts_patterns = [

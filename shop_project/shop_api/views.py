@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model, login
 
-from rest_framework import generics
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveDestroyAPIView, ListAPIView
+from rest_framework.response import Response
 
 from shop_api.models import (
     Product,
@@ -9,21 +12,12 @@ from shop_api.models import (
 from shop_api.serializers import (
     ProductSerializer,
     OrderSerializer,
-)
-
-User = get_user_model()
-
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.generics import CreateAPIView, GenericAPIView
-from rest_framework.response import Response
-from rest_framework.generics import RetrieveDestroyAPIView
-
-from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
     TokenSerializer
 )
+
+User = get_user_model()
 
 
 class UserRegistrationAPIView(CreateAPIView):
@@ -76,7 +70,7 @@ class UserTokenAPIView(RetrieveDestroyAPIView):
         return super(UserTokenAPIView, self).destroy(request, key, *args, **kwargs)
 
 
-class ProductListAPIView(generics.ListAPIView):
+class ProductListAPIView(ListAPIView):
     """
         API endpoint for listing products.
     """
@@ -87,7 +81,14 @@ class ProductListAPIView(generics.ListAPIView):
         return Product.objects.all()
 
 
-class OrderListAPIView(generics.ListAPIView):
+class ProductCreateAPIView(CreateAPIView):
+    serializer_class = ProductSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user)
+
+
+class OrderListAPIView(ListAPIView):
     """
         API endpoint for listing orders.
     """
@@ -97,7 +98,7 @@ class OrderListAPIView(generics.ListAPIView):
         return Order.objects.filter(customer=self.request.user.id)
 
 
-class OrderCreateAPIView(generics.CreateAPIView):
+class OrderCreateAPIView(CreateAPIView):
     serializer_class = OrderSerializer
 
     def perform_create(self, serializer):
